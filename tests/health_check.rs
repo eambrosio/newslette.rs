@@ -1,3 +1,5 @@
+use std::net::TcpListener;
+
 // `tokio::test` is the testing equivalent of `tokio::main`.
 // It also spares you from having to specify the `#[test]` attribute.
 //
@@ -5,18 +7,20 @@
 // `cargo expand --test health_check` (<- name of the test file)
 #[tokio::test]
 async fn health_check_works() {
-    spawn_app();
+    let address = spawn_app().await;
 
     // We need to bring in `reqwest`
     // to perform HTTP requests against our application.
     let client = reqwest::Client::new();
 
+    //we use the returned address
     let response = client
-        .get("http://127.0.0.1:8000/health_check")
+        .get(&format!("{}/health_check", &address))
         .send()
         .await
         .expect("Failed to execute request.");
 
+    println!("{}", address);
     assert!(response.status().is_success());
     assert_eq!(Some(0), response.content_length());
 }
@@ -25,11 +29,15 @@ async fn health_check_works() {
 // We are also running tests, so it is not worth it to propagate errors:
 // if we fail to perform the required setup we can just panic and crash
 // all the things.
-async fn spawn_app() {
-    let server = newsletter::run().expect("Failed to bind address");
-    // Launch the server as a background task
+async fn spawn_app() -> String {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind a random port");
 
-    // tokio::spawn returns a handle to the spawned future,
-    // but we have no use for it here, hence the non-binding let
+    //we retrieve the port
+    let port = listener.local_addr().unwrap().port();
+    let server = newsletter::run(listener).expect("Failed to bind address");
+    // Launch the server as a background task
     let _ = tokio::spawn(server);
+
+    //we return the address to the caller
+    format!("http://127.0.0.1:{}", port)
 }
