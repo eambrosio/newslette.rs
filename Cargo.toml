@@ -1,5 +1,5 @@
 [package]
-name = "newsletter"
+name = "newslette-rs"
 version = "0.1.0"
 edition = "2021"
 authors = ["Emilio Ambrosio <emilio.ambrosio@gmail.com>"]
@@ -18,7 +18,7 @@ path = "src/lib.rs"
 # have a look at the workspace feature 
 [[bin]]
 path = "src/main.rs"
-name = "newsletter"
+name = "newslette-rs"
 
 [dependencies]
 actix-web = "4"

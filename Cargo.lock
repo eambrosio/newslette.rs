@@ -837,7 +837,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "newsletter"
+name = "newslette-rs"
 version = "0.1.0"
 dependencies = [
  "actix-web",

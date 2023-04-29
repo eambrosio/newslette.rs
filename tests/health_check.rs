@@ -1,3 +1,5 @@
+//! tests/health_check.rs
+
 use std::net::TcpListener;
 
 // `tokio::test` is the testing equivalent of `tokio::main`.
@@ -7,7 +9,7 @@ use std::net::TcpListener;
 // `cargo expand --test health_check` (<- name of the test file)
 #[tokio::test]
 async fn health_check_works() {
-    let address = spawn_app().await;
+    let address = spawn_app();
 
     // We need to bring in `reqwest`
     // to perform HTTP requests against our application.
@@ -29,12 +31,13 @@ async fn health_check_works() {
 // We are also running tests, so it is not worth it to propagate errors:
 // if we fail to perform the required setup we can just panic and crash
 // all the things.
-async fn spawn_app() -> String {
+fn spawn_app() -> String {
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind a random port");
 
     //we retrieve the port
     let port = listener.local_addr().unwrap().port();
-    let server = newsletter::run(listener).expect("Failed to bind address");
+    let server = newslette_rs::run(listener).expect("Failed to bind address");
+
     // Launch the server as a background task
     let _ = tokio::spawn(server);
 
