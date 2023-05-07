@@ -1,9 +1,9 @@
+use newslette_rs::startup;
 use std::net::TcpListener;
-
-use newslette_rs::run;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     let listener = TcpListener::bind("127.0.0.1:8000").expect("Failed to bind a random port");
-    run(listener)?.await
+
+    startup::run(listener)?.await
 }
