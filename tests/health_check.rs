@@ -2,7 +2,8 @@
 
 use std::net::TcpListener;
 
-use newslette_rs::startup;
+use newslette_rs::{configuration, startup};
+use sqlx::{Connection, PgConnection};
 
 // `tokio::test` is the testing equivalent of `tokio::main`.
 // It also spares you from having to specify the `#[test]` attribute.
@@ -50,6 +51,12 @@ fn spawn_app() -> String {
 #[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
     let app_address = spawn_app();
+    let configuration = configuration::read_config().expect("Failed to read the configuration");
+    let connection_string = configuration.database.connection_string();
+    let mut connection = PgConnection::connect(&connection_string)
+        .await
+        .expect("failed to connect to the databse");
+
     let client = reqwest::Client::new();
 
     let body = "name=emilio%20ambrosio&email=emilio.ambrosio%40gmail.com";
@@ -61,7 +68,15 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
         .await
         .expect("Failed to execute request");
 
-    assert_eq!(200, response.status().as_u16())
+    assert_eq!(200, response.status().as_u16());
+
+    let saved = sqlx::query!("SELECT email, name FROM subscriptions",)
+        .fetch_one(&mut connection)
+        .await
+        .expect("Failed to fetch saved subscription.");
+
+    assert_eq!(saved.email, "emilio.ambrosio@gmail.com");
+    assert_eq!(saved.name, "emilio ambrosio");
 }
 
 #[tokio::test]

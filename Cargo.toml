@@ -22,6 +22,7 @@ name = "newslette-rs"
 
 [dependencies]
 actix-web = "4"
+config = "0.13"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 # We need the optional `derive` feature to use `serde`'s procedural macros: 
 # `#[derive(Serialize)]` and `#[derive(Deserialize)]`.
